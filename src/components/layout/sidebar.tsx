@@ -8,7 +8,9 @@ import {
   Package,
   ShoppingCart,
   Store,
+  LogOut,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -69,7 +71,14 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border">
+      <div className="p-3 border-t border-sidebar-border space-y-1">
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          Выйти
+        </button>
         <p className="px-3 text-[11px] text-muted-foreground">v0.1.0 MVP</p>
       </div>
     </aside>
