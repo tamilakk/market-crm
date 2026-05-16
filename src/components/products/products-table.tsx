@@ -158,12 +158,12 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   </span>
 
                   <span className="text-sm text-muted-foreground">
-                    {product.purchasePrice.toLocaleString("ru")} ₽
+                    {product.purchasePrice.toLocaleString("ru-KZ")} ₸
                   </span>
 
                   <div>
                     <span className="text-sm font-medium text-foreground">
-                      {product.sellPrice.toLocaleString("ru")} ₽
+                      {product.sellPrice.toLocaleString("ru-KZ")} ₸
                     </span>
                     {margin > 0 && (
                       <span className="ml-1.5 text-xs text-green-400">+{margin}%</span>

@@ -122,12 +122,12 @@ export function ProductForm({ open, onOpenChange, defaultValues }: ProductFormPr
           {/* Цены */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-sm text-foreground">Закупочная цена, ₽</Label>
+              <Label className="text-sm text-foreground">Закупочная цена, ₸</Label>
               <Input type="number" step="0.01" placeholder="0" {...numField("purchasePrice")} />
               {errors.purchasePrice && <p className="text-xs text-destructive">{errors.purchasePrice.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm text-foreground">Цена продажи, ₽</Label>
+              <Label className="text-sm text-foreground">Цена продажи, ₸</Label>
               <Input type="number" step="0.01" placeholder="0" {...numField("sellPrice")} />
               {errors.sellPrice && <p className="text-xs text-destructive">{errors.sellPrice.message}</p>}
             </div>

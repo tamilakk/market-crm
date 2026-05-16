@@ -39,19 +39,19 @@ export default async function SalesPage() {
           <div className="rounded-xl border border-border bg-card px-5 py-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Выручка всего</p>
             <p className="mt-1 text-xl font-semibold text-foreground">
-              {stats.totalRevenue.toLocaleString("ru")} ₽
+              {stats.totalRevenue.toLocaleString("ru-KZ")} ₸
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card px-5 py-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">За этот месяц</p>
             <p className="mt-1 text-xl font-semibold text-primary">
-              {stats.monthRevenue.toLocaleString("ru")} ₽
+              {stats.monthRevenue.toLocaleString("ru-KZ")} ₸
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card px-5 py-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Общий долг</p>
             <p className={`mt-1 text-xl font-semibold ${stats.totalDebt > 0 ? "text-red-400" : "text-foreground"}`}>
-              {stats.totalDebt.toLocaleString("ru")} ₽
+              {stats.totalDebt.toLocaleString("ru-KZ")} ₸
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card px-5 py-4">
