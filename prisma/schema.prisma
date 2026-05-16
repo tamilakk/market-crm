@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Покупатель
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  type      String   @default("retail") // retail | wholesale | contractor
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sales Sale[]
+}
+
+// Товар
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  sku           String?  @unique
+  category      String   // wallpaper | laminate | other
+  unit          String   @default("piece") // piece | roll | box | m2
+  purchasePrice Float
+  sellPrice     Float
+  stock         Float    @default(0)
+  minStock      Float    @default(5)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  saleItems SaleItem[]
+}
+
+// Продажа
+model Sale {
+  id          String   @id @default(cuid())
+  clientId    String?
+  status      String   @default("paid") // paid | debt | partial
+  totalAmount Float
+  paidAmount  Float    @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client    Client?    @relation(fields: [clientId], references: [id])
+  saleItems SaleItem[]
+}
+
+// Позиция в продаже (один товар внутри продажи)
+model SaleItem {
+  id           String  @id @default(cuid())
+  saleId       String
+  productId    String
+  quantity     Float
+  priceAtSale  Float   // цена на момент продажи (может отличаться от текущей)
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
