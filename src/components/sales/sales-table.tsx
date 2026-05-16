@@ -51,7 +51,7 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
         <div className="mb-5 flex items-center gap-3 rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3">
           <span className="h-2 w-2 rounded-full bg-red-400 shrink-0" />
           <span className="text-sm text-red-400 font-medium">
-            Общий долг: {totalDebt.toLocaleString("ru")} ₽
+            Общий долг: {totalDebt.toLocaleString("ru-KZ")} ₸
           </span>
         </div>
       )}
@@ -145,11 +145,11 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
 
                 <div>
                   <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {sale.totalAmount.toLocaleString("ru")} ₽
+                    {sale.totalAmount.toLocaleString("ru-KZ")} ₸
                   </p>
                   {sale.status !== "paid" && (
                     <p className="text-xs text-red-400 mt-0.5">
-                      долг: {(sale.totalAmount - sale.paidAmount).toLocaleString("ru")} ₽
+                      долг: {(sale.totalAmount - sale.paidAmount).toLocaleString("ru-KZ")} ₸
                     </p>
                   )}
                 </div>

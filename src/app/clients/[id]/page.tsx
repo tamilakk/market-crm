@@ -61,11 +61,11 @@ export default async function ClientDetailPage({ params }: Props) {
           { label: "Покупок", value: client.sales.length },
           {
             label: "Оплачено",
-            value: `${totalRevenue.toLocaleString("ru")} ₽`,
+            value: `${totalRevenue.toLocaleString("ru-KZ")} ₸`,
           },
           {
             label: "Долг",
-            value: `${debtAmount.toLocaleString("ru")} ₽`,
+            value: `${debtAmount.toLocaleString("ru-KZ")} ₸`,
             highlight: debtAmount > 0,
           },
         ].map(({ label, value, highlight }) => (
@@ -128,7 +128,7 @@ export default async function ClientDetailPage({ params }: Props) {
               >
                 <div>
                   <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                    {sale.totalAmount.toLocaleString("ru")} ₽
+                    {sale.totalAmount.toLocaleString("ru-KZ")} ₸
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {format(sale.createdAt, "d MMM yyyy", { locale: ru })}

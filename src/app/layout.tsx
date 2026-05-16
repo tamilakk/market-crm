@@ -8,7 +8,7 @@ const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Рынок CRM",
-  description: "CRM для торговли строительными материалами",
+  description: "CRM для торговли стройматериалами — Қарағанды",
 };
 
 export default function RootLayout({
