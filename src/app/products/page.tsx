@@ -21,7 +21,7 @@ export default async function ProductsPage() {
           <h1 className="text-2xl font-semibold text-foreground">Товары</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {products.length > 0
-              ? `${products.length} позиций · склад на ${totalValue.toLocaleString("ru")} ₽`
+              ? `${products.length} позиций · склад на ${totalValue.toLocaleString("ru-KZ")} ₸`
               : "Добавьте первый товар"}
           </p>
         </div>

@@ -30,7 +30,7 @@ export function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold text-foreground leading-none">Рынок CRM</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Стройматериалы</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Қарағанды</p>
         </div>
       </div>
 

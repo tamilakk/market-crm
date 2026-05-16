@@ -83,9 +83,9 @@ export function SaleActions({ sale }: { sale: Sale }) {
             {status === "partial" && (
               <div className="space-y-1.5">
                 <Label className="text-foreground">
-                  Оплачено, ₽
+                  Оплачено, ₸
                   <span className="ml-2 text-xs text-muted-foreground">
-                    из {sale.totalAmount.toLocaleString("ru")} ₽
+                    из {sale.totalAmount.toLocaleString("ru-KZ")} ₸
                   </span>
                 </Label>
                 <Input
@@ -120,7 +120,7 @@ export function SaleActions({ sale }: { sale: Sale }) {
           <p className="text-sm text-muted-foreground">
             Продажа на{" "}
             <span className="font-medium text-foreground">
-              {sale.totalAmount.toLocaleString("ru")} ₽
+              {sale.totalAmount.toLocaleString("ru-KZ")} ₸
             </span>{" "}
             будет удалена, а товары вернутся на склад.
           </p>
