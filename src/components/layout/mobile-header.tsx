@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Store, LayoutDashboard, Users, Package, ShoppingCart } from "lucide-react";
+import {
+  Menu,
+  Store,
+  LayoutDashboard,
+  Users,
+  Package,
+  ShoppingCart,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
@@ -19,17 +26,19 @@ export function MobileHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-white px-4 md:hidden">
+    <header className="flex h-14 items-center gap-3 border-b border-border bg-card px-4 md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="p-1">
-          <Menu className="h-6 w-6" />
+        <SheetTrigger className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+          <Menu className="h-5 w-5" />
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <div className="flex h-16 items-center gap-2 border-b px-6">
-            <Store className="h-6 w-6 text-blue-600" />
-            <span className="font-semibold text-gray-900">Рынок CRM</span>
+        <SheetContent side="left" className="w-60 p-0 bg-sidebar border-r border-sidebar-border">
+          <div className="flex h-14 items-center gap-3 px-5 border-b border-sidebar-border">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+              <Store className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">Рынок CRM</span>
           </div>
-          <nav className="space-y-1 p-4">
+          <nav className="space-y-0.5 p-3">
             {navItems.map(({ href, label, icon: Icon }) => {
               const isActive =
                 href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -39,13 +48,13 @@ export function MobileHeader() {
                   href={href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all",
                     isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-primary/15 text-primary border border-primary/20"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4 shrink-0" />
                   {label}
                 </Link>
               );
@@ -55,8 +64,10 @@ export function MobileHeader() {
       </Sheet>
 
       <div className="flex items-center gap-2">
-        <Store className="h-5 w-5 text-blue-600" />
-        <span className="font-semibold text-gray-900">Рынок CRM</span>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+          <Store className="h-4 w-4 text-primary-foreground" />
+        </div>
+        <span className="text-sm font-semibold text-foreground">Рынок CRM</span>
       </div>
     </header>
   );
