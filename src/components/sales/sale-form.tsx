@@ -125,7 +125,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
         <div className="hidden sm:grid grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <span>Товар</span>
           <span>Кол-во</span>
-          <span>Цена, ₽</span>
+          <span>Цена, ₸</span>
           <span>Сумма</span>
           <span />
         </div>
@@ -194,7 +194,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
 
                 {/* Строчный итог */}
                 <span className="text-sm font-medium text-foreground text-right">
-                  {rowTotal.toLocaleString("ru")} ₽
+                  {rowTotal.toLocaleString("ru-KZ")} ₸
                 </span>
 
                 {/* Удалить строку */}
@@ -227,7 +227,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
         <div className="px-5 py-4 border-t border-border bg-muted/20 flex justify-end items-center gap-3">
           <span className="text-sm text-muted-foreground">Итого:</span>
           <span className="text-xl font-semibold text-foreground">
-            {total.toLocaleString("ru")} ₽
+            {total.toLocaleString("ru-KZ")} ₸
           </span>
         </div>
       </div>
@@ -271,9 +271,9 @@ export function SaleForm({ clients, products }: SaleFormProps) {
         {status === "partial" && (
           <div className="space-y-1.5">
             <Label className="text-sm text-foreground">
-              Оплачено сейчас, ₽
+              Оплачено сейчас, ₸
               <span className="ml-2 text-xs text-muted-foreground">
-                (осталось: {(total - (watch("paidAmount") || 0)).toLocaleString("ru")} ₽)
+                (осталось: {(total - (watch("paidAmount") || 0)).toLocaleString("ru-KZ")} ₸)
               </span>
             </Label>
             <Input
@@ -315,7 +315,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           disabled={isSubmitting || total === 0}
           className="ml-auto bg-primary text-primary-foreground hover:bg-primary/90 px-8"
         >
-          {isSubmitting ? "Создаём продажу..." : `Оформить на ${total.toLocaleString("ru")} ₽`}
+          {isSubmitting ? "Создаём продажу..." : `Оформить на ${total.toLocaleString("ru-KZ")} ₸`}
         </Button>
       </div>
     </form>

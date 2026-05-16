@@ -67,13 +67,13 @@ export default async function ProductDetailPage({ params }: Props) {
           {
             icon: Tag,
             label: "Цена закупки",
-            value: `${product.purchasePrice.toLocaleString("ru")} ₽`,
+            value: `${product.purchasePrice.toLocaleString("ru-KZ")} ₸`,
             sub: `за 1 ${unitLabel(product.unit)}`,
           },
           {
             icon: TrendingUp,
             label: "Цена продажи",
-            value: `${product.sellPrice.toLocaleString("ru")} ₽`,
+            value: `${product.sellPrice.toLocaleString("ru-KZ")} ₸`,
             sub: margin > 0 ? `наценка ${margin.toFixed(0)}%` : "наценка не задана",
             highlight: margin > 0,
           },
@@ -87,7 +87,7 @@ export default async function ProductDetailPage({ params }: Props) {
             icon: ShoppingCart,
             label: "Продано",
             value: `${totalSold} ${unitLabel(product.unit)}`,
-            sub: `выручка ${totalRevenue.toLocaleString("ru")} ₽`,
+            sub: `выручка ${totalRevenue.toLocaleString("ru-KZ")} ₸`,
           },
         ].map(({ icon: Icon, label, value, sub, highlight }) => (
           <div key={label} className="rounded-xl border border-border bg-card p-4">
@@ -131,7 +131,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors group">
                 <div>
                   <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                    {item.quantity} {unitLabel(product.unit)} × {item.priceAtSale.toLocaleString("ru")} ₽
+                    {item.quantity} {unitLabel(product.unit)} × {item.priceAtSale.toLocaleString("ru-KZ")} ₸
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {item.sale.client?.name ?? "Без клиента"} ·{" "}
@@ -139,7 +139,7 @@ export default async function ProductDetailPage({ params }: Props) {
                   </p>
                 </div>
                 <span className="text-sm font-semibold text-foreground">
-                  {(item.quantity * item.priceAtSale).toLocaleString("ru")} ₽
+                  {(item.quantity * item.priceAtSale).toLocaleString("ru-KZ")} ₸
                 </span>
               </Link>
             ))}

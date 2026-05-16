@@ -40,7 +40,7 @@ export default async function SaleDetailPage({ params }: Props) {
         <div>
           <div className="flex items-center gap-3 mb-2 flex-wrap">
             <h1 className="text-2xl font-semibold text-foreground">
-              {sale.totalAmount.toLocaleString("ru")} ₽
+              {sale.totalAmount.toLocaleString("ru-KZ")} ₸
             </h1>
             <SaleStatusBadge status={sale.status} />
           </div>
@@ -54,9 +54,9 @@ export default async function SaleDetailPage({ params }: Props) {
       {/* Payment info */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Сумма продажи", value: `${sale.totalAmount.toLocaleString("ru")} ₽`, color: "text-foreground" },
-          { label: "Оплачено",      value: `${sale.paidAmount.toLocaleString("ru")} ₽`,  color: "text-green-400" },
-          { label: "Долг",          value: `${debt.toLocaleString("ru")} ₽`,              color: debt > 0 ? "text-red-400" : "text-muted-foreground" },
+          { label: "Сумма продажи", value: `${sale.totalAmount.toLocaleString("ru-KZ")} ₸`, color: "text-foreground" },
+          { label: "Оплачено",      value: `${sale.paidAmount.toLocaleString("ru-KZ")} ₸`,  color: "text-green-400" },
+          { label: "Долг",          value: `${debt.toLocaleString("ru-KZ")} ₸`,              color: debt > 0 ? "text-red-400" : "text-muted-foreground" },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs text-muted-foreground mb-1">{label}</p>
@@ -100,11 +100,11 @@ export default async function SaleDetailPage({ params }: Props) {
                   {item.product.name}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {item.quantity} {unitLabel(item.product.unit)} × {item.priceAtSale.toLocaleString("ru")} ₽
+                  {item.quantity} {unitLabel(item.product.unit)} × {item.priceAtSale.toLocaleString("ru-KZ")} ₸
                 </p>
               </div>
               <span className="text-sm font-semibold text-foreground">
-                {(item.quantity * item.priceAtSale).toLocaleString("ru")} ₽
+                {(item.quantity * item.priceAtSale).toLocaleString("ru-KZ")} ₸
               </span>
             </Link>
           ))}
@@ -114,7 +114,7 @@ export default async function SaleDetailPage({ params }: Props) {
         <div className="flex justify-between px-5 py-4 border-t border-border bg-muted/20">
           <span className="text-sm text-muted-foreground">Итого</span>
           <span className="text-base font-semibold text-foreground">
-            {sale.totalAmount.toLocaleString("ru")} ₽
+            {sale.totalAmount.toLocaleString("ru-KZ")} ₸
           </span>
         </div>
       </div>
