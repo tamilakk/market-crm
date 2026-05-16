@@ -2,14 +2,14 @@ import { z } from "zod";
 
 const saleItemSchema = z.object({
   productId: z.string().min(1, "Выберите товар"),
-  quantity: z.coerce.number().min(0.1, "Количество должно быть больше 0"),
-  priceAtSale: z.coerce.number().min(0),
+  quantity: z.number().min(0.1, "Количество должно быть больше 0"),
+  priceAtSale: z.number().min(0),
 });
 
 export const saleSchema = z.object({
   clientId: z.string().optional(),
   status: z.enum(["paid", "debt", "partial"]),
-  paidAmount: z.coerce.number().min(0),
+  paidAmount: z.number().min(0),
   notes: z.string().optional(),
   items: z.array(saleItemSchema).min(1, "Добавьте хотя бы один товар"),
 });
