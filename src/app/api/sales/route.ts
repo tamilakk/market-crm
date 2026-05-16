@@ -2,12 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saleSchema } from "@/lib/validations/sale";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get("status") ?? "";
-
+export async function GET() {
   const sales = await prisma.sale.findMany({
-    where: status ? { status } : undefined,
     orderBy: { createdAt: "desc" },
     include: {
       client: { select: { id: true, name: true } },
@@ -16,7 +12,6 @@ export async function GET(request: Request) {
       },
     },
   });
-
   return NextResponse.json(sales);
 }
 
@@ -31,25 +26,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const { items, status, paidAmount, ...rest } = parsed.data;
-
-  // Считаем итог из позиций
+  const { items, ...rest } = parsed.data;
   const totalAmount = items.reduce(
     (sum, item) => sum + item.quantity * item.priceAtSale,
     0
   );
 
-  // Если статус "paid" — оплачено всё, иначе берём переданную сумму
-  const finalPaidAmount = status === "paid" ? totalAmount : paidAmount;
-
-  // Транзакция: создаём продажу + позиции + уменьшаем остатки
   const sale = await prisma.$transaction(async (tx) => {
     const created = await tx.sale.create({
       data: {
         ...rest,
-        status,
+        status: "paid",
         totalAmount,
-        paidAmount: finalPaidAmount,
+        paidAmount: totalAmount,
         saleItems: {
           create: items.map((item) => ({
             productId: item.productId,
@@ -60,7 +49,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Уменьшаем остаток каждого товара
     for (const item of items) {
       await tx.product.update({
         where: { id: item.productId },

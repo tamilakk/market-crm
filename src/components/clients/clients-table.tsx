@@ -14,18 +14,27 @@ interface ClientsTableProps {
   clients: (Client & { _count: { sales: number } })[];
 }
 
+const TYPE_FILTERS = [
+  { value: "",           label: "Все" },
+  { value: "retail",     label: "Розница" },
+  { value: "wholesale",  label: "Опт" },
+  { value: "contractor", label: "Подрядчики" },
+];
+
 export function ClientsTable({ clients }: ClientsTableProps) {
   const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [, startTransition] = useTransition();
   const router = useRouter();
 
   const filtered = clients.filter((c) => {
     const q = query.toLowerCase();
-    return (
+    const matchQuery =
       c.name.toLowerCase().includes(q) ||
-      (c.phone ?? "").toLowerCase().includes(q)
-    );
+      (c.phone ?? "").toLowerCase().includes(q);
+    const matchType = !typeFilter || c.type === typeFilter;
+    return matchQuery && matchType;
   });
 
   const handleFormClose = (open: boolean) => {
@@ -36,8 +45,8 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   return (
     <>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={query}
@@ -46,9 +55,26 @@ export function ClientsTable({ clients }: ClientsTableProps) {
             className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground"
           />
         </div>
+
+        <div className="flex gap-1">
+          {TYPE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setTypeFilter(f.value)}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                typeFilter === f.value
+                  ? "bg-primary/15 text-primary border border-primary/25"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
         <Button
           onClick={() => setFormOpen(true)}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+          className="ml-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
         >
           <Plus className="h-4 w-4" />
           Добавить клиента
@@ -63,12 +89,11 @@ export function ClientsTable({ clients }: ClientsTableProps) {
           </div>
           <p className="text-sm font-medium text-foreground">Клиенты не найдены</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {query ? "Попробуйте другой запрос" : "Добавьте первого клиента"}
+            {query || typeFilter ? "Попробуйте изменить фильтры" : "Добавьте первого клиента"}
           </p>
         </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          {/* Table header */}
           <div className="grid grid-cols-[1fr_160px_140px_80px_40px] gap-4 px-4 py-3 bg-muted/40 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <span>Клиент</span>
             <span>Телефон</span>
@@ -77,7 +102,6 @@ export function ClientsTable({ clients }: ClientsTableProps) {
             <span />
           </div>
 
-          {/* Rows */}
           <div className="divide-y divide-border">
             {filtered.map((client) => (
               <Link

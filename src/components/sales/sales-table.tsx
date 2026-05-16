@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { Search, Plus, ChevronRight, ShoppingCart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SaleStatusBadge } from "./sale-status-badge";
-import { format } from "date-fns";
+import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ru } from "date-fns/locale";
 import type { Client, Product, Sale, SaleItem } from "@/types";
 
@@ -18,16 +17,24 @@ type SaleWithRelations = Sale & {
   })[];
 };
 
-const STATUS_FILTERS = [
-  { value: "", label: "Все" },
-  { value: "paid", label: "Оплачено" },
-  { value: "partial", label: "Частично" },
-  { value: "debt", label: "Долг" },
+const DATE_FILTERS = [
+  { value: "all",   label: "Все" },
+  { value: "today", label: "Сегодня" },
+  { value: "week",  label: "Неделя" },
+  { value: "month", label: "Месяц" },
 ];
+
+function matchesDate(sale: SaleWithRelations, filter: string) {
+  const d = new Date(sale.createdAt);
+  if (filter === "today") return isToday(d);
+  if (filter === "week")  return isThisWeek(d, { weekStartsOn: 1 });
+  if (filter === "month") return isThisMonth(d);
+  return true;
+}
 
 export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const router = useRouter();
 
   const filtered = sales.filter((s) => {
@@ -36,26 +43,11 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
       !q ||
       (s.client?.name ?? "").toLowerCase().includes(q) ||
       s.saleItems.some((i) => i.product.name.toLowerCase().includes(q));
-    const matchStatus = !statusFilter || s.status === statusFilter;
-    return matchQuery && matchStatus;
+    return matchQuery && matchesDate(s, dateFilter);
   });
-
-  const totalDebt = sales
-    .filter((s) => s.status !== "paid")
-    .reduce((sum, s) => sum + (s.totalAmount - s.paidAmount), 0);
 
   return (
     <>
-      {/* Долг-баннер */}
-      {totalDebt > 0 && (
-        <div className="mb-5 flex items-center gap-3 rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3">
-          <span className="h-2 w-2 rounded-full bg-red-400 shrink-0" />
-          <span className="text-sm text-red-400 font-medium">
-            Общий долг: {totalDebt.toLocaleString("ru-KZ")} ₸
-          </span>
-        </div>
-      )}
-
       {/* Toolbar */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -69,12 +61,12 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
         </div>
 
         <div className="flex gap-1">
-          {STATUS_FILTERS.map((f) => (
+          {DATE_FILTERS.map((f) => (
             <button
               key={f.value}
-              onClick={() => setStatusFilter(f.value)}
+              onClick={() => setDateFilter(f.value)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                statusFilter === f.value
+                dateFilter === f.value
                   ? "bg-primary/15 text-primary border border-primary/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent"
               }`}
@@ -101,13 +93,13 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
           </div>
           <p className="text-base font-medium text-foreground">Продажи не найдены</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {query || statusFilter ? "Попробуйте изменить фильтры" : "Оформите первую продажу"}
+            {query || dateFilter !== "all" ? "Попробуйте изменить фильтры" : "Оформите первую продажу"}
           </p>
         </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          <div className="grid grid-cols-[140px_1fr_130px_130px_120px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
-            {["Дата", "Позиции", "Клиент", "Сумма", "Статус", ""].map((h) => (
+          <div className="grid grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
+            {["Дата", "Позиции", "Клиент", "Сумма", ""].map((h) => (
               <span key={h} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {h}
               </span>
@@ -119,14 +111,14 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
               <Link
                 key={sale.id}
                 href={`/sales/${sale.id}`}
-                className="grid grid-cols-[140px_1fr_130px_130px_120px_36px] gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+                className="grid grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
               >
                 <div>
                   <p className="text-sm font-medium text-foreground">
-                    {format(sale.createdAt, "d MMM yyyy", { locale: ru })}
+                    {format(new Date(sale.createdAt), "d MMM yyyy", { locale: ru })}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {format(sale.createdAt, "HH:mm")}
+                    {format(new Date(sale.createdAt), "HH:mm")}
                   </p>
                 </div>
 
@@ -143,18 +135,9 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
                   {sale.client?.name ?? <span className="text-muted-foreground">—</span>}
                 </p>
 
-                <div>
-                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {sale.totalAmount.toLocaleString("ru-KZ")} ₸
-                  </p>
-                  {sale.status !== "paid" && (
-                    <p className="text-xs text-red-400 mt-0.5">
-                      долг: {(sale.totalAmount - sale.paidAmount).toLocaleString("ru-KZ")} ₸
-                    </p>
-                  )}
-                </div>
-
-                <SaleStatusBadge status={sale.status} />
+                <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {sale.totalAmount.toLocaleString("ru-KZ")} ₸
+                </p>
 
                 <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors justify-self-end" />
               </Link>

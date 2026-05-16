@@ -8,8 +8,6 @@ const saleItemSchema = z.object({
 
 export const saleSchema = z.object({
   clientId: z.string().optional(),
-  status: z.enum(["paid", "debt", "partial"]),
-  paidAmount: z.number().min(0),
   notes: z.string().optional(),
   items: z.array(saleItemSchema).min(1, "Добавьте хотя бы один товар"),
 });

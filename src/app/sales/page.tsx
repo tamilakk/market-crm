@@ -14,18 +14,17 @@ export default async function SalesPage() {
   });
 
   const monthStart = startOfMonth(new Date());
-  const monthSales = sales.filter((s) => s.createdAt >= monthStart);
+  const monthSales = sales.filter((s) => new Date(s.createdAt) >= monthStart);
 
   const stats = {
-    totalRevenue: sales.reduce((sum, s) => sum + s.paidAmount, 0),
-    monthRevenue: monthSales.reduce((sum, s) => sum + s.paidAmount, 0),
-    totalDebt: sales.reduce((sum, s) => sum + Math.max(0, s.totalAmount - s.paidAmount), 0),
-    debtCount: sales.filter((s) => s.status !== "paid").length,
+    totalRevenue: sales.reduce((sum, s) => sum + s.totalAmount, 0),
+    monthRevenue: monthSales.reduce((sum, s) => sum + s.totalAmount, 0),
+    monthCount: monthSales.length,
+    avgAmount: sales.length > 0 ? Math.round(sales.reduce((sum, s) => sum + s.totalAmount, 0) / sales.length) : 0,
   };
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-foreground">Продажи</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -33,7 +32,6 @@ export default async function SalesPage() {
         </p>
       </div>
 
-      {/* Stats */}
       {sales.length > 0 && (
         <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="rounded-xl border border-border bg-card px-5 py-4">
@@ -49,15 +47,13 @@ export default async function SalesPage() {
             </p>
           </div>
           <div className="rounded-xl border border-border bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Общий долг</p>
-            <p className={`mt-1 text-xl font-semibold ${stats.totalDebt > 0 ? "text-red-400" : "text-foreground"}`}>
-              {stats.totalDebt.toLocaleString("ru-KZ")} ₸
-            </p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Продаж за месяц</p>
+            <p className="mt-1 text-xl font-semibold text-foreground">{stats.monthCount}</p>
           </div>
           <div className="rounded-xl border border-border bg-card px-5 py-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">С долгом</p>
-            <p className={`mt-1 text-xl font-semibold ${stats.debtCount > 0 ? "text-yellow-400" : "text-foreground"}`}>
-              {stats.debtCount} продаж
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Средний чек</p>
+            <p className="mt-1 text-xl font-semibold text-foreground">
+              {stats.avgAmount.toLocaleString("ru-KZ")} ₸
             </p>
           </div>
         </div>

@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Базар CRM
 
-## Getting Started
+CRM-система для магазина стройматериалов на рынке Қарағанды. Управление товарами, клиентами и продажами.
 
-First, run the development server:
+**Стек:** Next.js 16 (App Router) · TypeScript · Prisma 7 · SQLite/Turso · shadcn/ui · Tailwind v4 · Recharts
+
+## Что умеет
+
+- **Дашборд** — выручка за 14 дней, топ-5 товаров, последние продажи, склад
+- **Продажи** — оформление с несколькими позициями, автосписание со склада
+- **Клиенты** — база покупателей с поиском и фильтром по типу (розница / опт / подрядчики)
+- **Товары** — склад с категориями и поиском, предупреждения о низком остатке
+- **Авторизация** — защита паролем (один пользователь, без регистрации)
+
+## Запуск локально
 
 ```bash
+git clone https://github.com/tamilakk/market-crm
+cd market-crm
+npm install
+
+cp .env.example .env
+# Задать AUTH_USERNAME и AUTH_PASSWORD в .env
+
+npx prisma migrate dev
+npm run db:seed   # демо-данные (12 товаров, 7 клиентов, 21 продажа)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Открыть http://localhost:3000 · логин из `.env`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Деплой на Vercel + Turso
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Создать базу в Turso (бесплатно)
 
-## Learn More
+```bash
+npm install -g @tursodatabase/turso-cli
+turso auth login
+turso db create market-crm
+turso db show market-crm          # скопировать URL (libsql://...)
+turso db tokens create market-crm # скопировать токен
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Применить миграции к Turso
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Временно изменить `.env`:
+```
+DATABASE_URL="libsql://your-db.turso.io"
+TURSO_AUTH_TOKEN="your-token"
+```
+```bash
+npx prisma migrate deploy
+npm run db:seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Деплой на Vercel
 
-## Deploy on Vercel
+```bash
+npm install -g vercel
+vercel --prod
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Добавить переменные в Vercel → Project → Settings → Environment Variables:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Переменная | Значение |
+|---|---|
+| `DATABASE_URL` | `libsql://your-db.turso.io` |
+| `TURSO_AUTH_TOKEN` | токен из шага 1 |
+| `AUTH_SECRET` | результат `openssl rand -hex 32` |
+| `AUTH_USERNAME` | логин |
+| `AUTH_PASSWORD` | пароль |
+
+## Скрипты
+
+| Команда | Что делает |
+|---|---|
+| `npm run dev` | Запуск в режиме разработки |
+| `npm run build` | Сборка для продакшн |
+| `npm run db:seed` | Заполнить базу демо-данными |
+| `npm run db:migrate` | Применить миграции Prisma |
+| `npm run db:studio` | Открыть Prisma Studio |
