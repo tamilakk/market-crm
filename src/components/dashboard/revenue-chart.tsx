@@ -6,7 +6,7 @@ import {
 } from "recharts";
 
 interface RevenueChartProps {
-  data: { date: string; revenue: number; debt: number }[];
+  data: { date: string; revenue: number }[];
 }
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -14,17 +14,13 @@ function CustomTooltip({ active, payload, label }: any) {
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2.5 shadow-xl text-sm">
       <p className="text-muted-foreground mb-1.5">{label}</p>
-      {payload.map((p: any) => (
-        <div key={p.dataKey} className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-          <span className="text-muted-foreground">
-            {p.dataKey === "revenue" ? "Выручка" : "Долг"}:
-          </span>
-          <span className="font-semibold text-foreground">
-            {p.value.toLocaleString("ru-KZ")} ₸
-          </span>
-        </div>
-      ))}
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-primary" />
+        <span className="text-muted-foreground">Выручка:</span>
+        <span className="font-semibold text-foreground">
+          {payload[0]?.value?.toLocaleString("ru-KZ")} ₸
+        </span>
+      </div>
     </div>
   );
 }
@@ -45,10 +41,6 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="oklch(0.705 0.213 47.6)" stopOpacity={0.25} />
             <stop offset="95%" stopColor="oklch(0.705 0.213 47.6)" stopOpacity={0} />
-          </linearGradient>
-          <linearGradient id="gradDebt" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="oklch(0.63 0.22 25)" stopOpacity={0.2} />
-            <stop offset="95%" stopColor="oklch(0.63 0.22 25)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.26 0.008 265)" vertical={false} />
@@ -75,16 +67,6 @@ export function RevenueChart({ data }: RevenueChartProps) {
           fill="url(#gradRevenue)"
           dot={false}
           activeDot={{ r: 4, fill: "oklch(0.705 0.213 47.6)" }}
-        />
-        <Area
-          type="monotone"
-          dataKey="debt"
-          stroke="oklch(0.63 0.22 25)"
-          strokeWidth={1.5}
-          fill="url(#gradDebt)"
-          dot={false}
-          activeDot={{ r: 4, fill: "oklch(0.63 0.22 25)" }}
-          strokeDasharray="4 2"
         />
       </AreaChart>
     </ResponsiveContainer>

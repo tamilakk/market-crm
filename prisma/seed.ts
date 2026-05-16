@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { subDays, subHours, subMinutes } from "date-fns";
+import { subDays, subHours } from "date-fns";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL is not set");
@@ -57,43 +57,43 @@ async function main() {
 
   const salesData = [
     // 60 дней назад
-    { daysAgo: 59, client: nurzhan, items: [{ product: lmOak, qty: 30, price: 4800 }, { product: underlay, qty: 3, price: 1400 }], paid: 0, status: "debt" as const },
-    { daysAgo: 55, client: remontPlus, items: [{ product: wpBrick, qty: 15, price: 3900 }, { product: glue, qty: 6, price: 1100 }], paid: 60000, status: "paid" as const },
+    { daysAgo: 59, client: nurzhan, items: [{ product: lmOak, qty: 30, price: 4800 }, { product: underlay, qty: 3, price: 1400 }] },
+    { daysAgo: 55, client: remontPlus, items: [{ product: wpBrick, qty: 15, price: 3900 }, { product: glue, qty: 6, price: 1100 }] },
     // 45 дней назад
-    { daysAgo: 46, client: arman, items: [{ product: wpBeige, qty: 8, price: 2800 }, { product: glue, qty: 2, price: 1100 }], paid: 24600, status: "paid" as const },
-    { daysAgo: 44, client: gulnara, items: [{ product: wpGray, qty: 6, price: 3400 }, { product: glue, qty: 2, price: 1100 }], paid: 10000, status: "partial" as const },
-    { daysAgo: 42, client: remontPlus, items: [{ product: lmPine, qty: 45, price: 3200 }, { product: underlay, qty: 5, price: 1400 }], paid: 0, status: "debt" as const },
+    { daysAgo: 46, client: arman, items: [{ product: wpBeige, qty: 8, price: 2800 }, { product: glue, qty: 2, price: 1100 }] },
+    { daysAgo: 44, client: gulnara, items: [{ product: wpGray, qty: 6, price: 3400 }, { product: glue, qty: 2, price: 1100 }] },
+    { daysAgo: 42, client: remontPlus, items: [{ product: lmPine, qty: 45, price: 3200 }, { product: underlay, qty: 5, price: 1400 }] },
     // 30 дней назад
-    { daysAgo: 32, client: rybalko, items: [{ product: wpBeige, qty: 12, price: 2800 }, { product: wpBrick, qty: 8, price: 3900 }, { product: glue, qty: 4, price: 1100 }], paid: 73600, status: "paid" as const },
-    { daysAgo: 30, client: nurzhan, items: [{ product: lmOak, qty: 50, price: 4600 }, { product: underlay, qty: 6, price: 1400 }], paid: 100000, status: "partial" as const },
-    { daysAgo: 28, client: arman, items: [{ product: lmPine, qty: 20, price: 3200 }], paid: 64000, status: "paid" as const },
-    { daysAgo: 27, client: null, items: [{ product: wpWhite, qty: 5, price: 1500 }, { product: glue, qty: 1, price: 1100 }], paid: 8600, status: "paid" as const },
+    { daysAgo: 32, client: rybalko, items: [{ product: wpBeige, qty: 12, price: 2800 }, { product: wpBrick, qty: 8, price: 3900 }, { product: glue, qty: 4, price: 1100 }] },
+    { daysAgo: 30, client: nurzhan, items: [{ product: lmOak, qty: 50, price: 4600 }, { product: underlay, qty: 6, price: 1400 }] },
+    { daysAgo: 28, client: arman, items: [{ product: lmPine, qty: 20, price: 3200 }] },
+    { daysAgo: 27, client: null, items: [{ product: wpWhite, qty: 5, price: 1500 }, { product: glue, qty: 1, price: 1100 }] },
     // 2 недели назад
-    { daysAgo: 15, client: aigul, items: [{ product: wpGray, qty: 10, price: 3400 }, { product: wpBlue, qty: 5, price: 3600 }, { product: glue, qty: 3, price: 1100 }], paid: 55000, status: "partial" as const },
-    { daysAgo: 14, client: remontPlus, items: [{ product: lmAsh, qty: 60, price: 5800 }, { product: underlay, qty: 7, price: 1400 }], paid: 0, status: "debt" as const },
-    { daysAgo: 13, client: daniyar, items: [{ product: primer, qty: 2, price: 5500 }, { product: underlay, qty: 2, price: 1400 }], paid: 13800, status: "paid" as const },
-    { daysAgo: 12, client: rybalko, items: [{ product: wpBrick, qty: 20, price: 3900 }], paid: 78000, status: "paid" as const },
-    { daysAgo: 10, client: arman, items: [{ product: lmOak, qty: 18, price: 4800 }, { product: underlay, qty: 2, price: 1400 }], paid: 43200, status: "partial" as const },
+    { daysAgo: 15, client: aigul, items: [{ product: wpGray, qty: 10, price: 3400 }, { product: wpBlue, qty: 5, price: 3600 }, { product: glue, qty: 3, price: 1100 }] },
+    { daysAgo: 14, client: remontPlus, items: [{ product: lmAsh, qty: 60, price: 5800 }, { product: underlay, qty: 7, price: 1400 }] },
+    { daysAgo: 13, client: daniyar, items: [{ product: primer, qty: 2, price: 5500 }, { product: underlay, qty: 2, price: 1400 }] },
+    { daysAgo: 12, client: rybalko, items: [{ product: wpBrick, qty: 20, price: 3900 }] },
+    { daysAgo: 10, client: arman, items: [{ product: lmOak, qty: 18, price: 4800 }, { product: underlay, qty: 2, price: 1400 }] },
     // Последняя неделя
-    { daysAgo: 6, client: gulnara, items: [{ product: wpBeige, qty: 9, price: 2800 }, { product: glue, qty: 2, price: 1100 }], paid: 27400, status: "paid" as const },
-    { daysAgo: 5, client: null, items: [{ product: lmPine, qty: 12, price: 3200 }, { product: underlay, qty: 2, price: 1400 }], paid: 41200, status: "paid" as const },
-    { daysAgo: 4, client: nurzhan, items: [{ product: lmWenge, qty: 25, price: 4200 }], paid: 60000, status: "partial" as const },
-    { daysAgo: 3, client: remontPlus, items: [{ product: wpGray, qty: 18, price: 3400 }, { product: wpBrick, qty: 10, price: 3900 }, { product: glue, qty: 6, price: 1100 }], paid: 107600, status: "paid" as const },
-    { daysAgo: 2, client: aigul, items: [{ product: wpBeige, qty: 7, price: 2800 }], paid: 0, status: "debt" as const },
-    { daysAgo: 1, client: daniyar, items: [{ product: lmAsh, qty: 15, price: 6000 }, { product: underlay, qty: 2, price: 1400 }], paid: 92800, status: "paid" as const },
-    { daysAgo: 0, client: arman, items: [{ product: wpBlue, qty: 8, price: 3600 }, { product: glue, qty: 2, price: 1100 }], paid: 31000, status: "paid" as const },
+    { daysAgo: 6, client: gulnara, items: [{ product: wpBeige, qty: 9, price: 2800 }, { product: glue, qty: 2, price: 1100 }] },
+    { daysAgo: 5, client: null, items: [{ product: lmPine, qty: 12, price: 3200 }, { product: underlay, qty: 2, price: 1400 }] },
+    { daysAgo: 4, client: nurzhan, items: [{ product: lmWenge, qty: 25, price: 4200 }] },
+    { daysAgo: 3, client: remontPlus, items: [{ product: wpGray, qty: 18, price: 3400 }, { product: wpBrick, qty: 10, price: 3900 }, { product: glue, qty: 6, price: 1100 }] },
+    { daysAgo: 2, client: aigul, items: [{ product: wpBeige, qty: 7, price: 2800 }] },
+    { daysAgo: 1, client: daniyar, items: [{ product: lmAsh, qty: 15, price: 6000 }, { product: underlay, qty: 2, price: 1400 }] },
+    { daysAgo: 0, client: arman, items: [{ product: wpBlue, qty: 8, price: 3600 }, { product: glue, qty: 2, price: 1100 }] },
   ];
 
-  for (const [i, s] of salesData.entries()) {
+  for (const s of salesData) {
     const totalAmount = s.items.reduce((sum, item) => sum + item.qty * item.price, 0);
     const createdAt = subHours(subDays(now, s.daysAgo), Math.floor(Math.random() * 8) + 8);
 
     await prisma.sale.create({
       data: {
         clientId: s.client?.id ?? null,
-        status: s.status,
+        status: "paid",
         totalAmount,
-        paidAmount: s.paid,
+        paidAmount: totalAmount,
         createdAt,
         updatedAt: createdAt,
         saleItems: {

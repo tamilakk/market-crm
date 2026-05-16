@@ -36,27 +36,19 @@ export function SaleForm({ clients, products }: SaleFormProps) {
     resolver: zodResolver(saleSchema),
     defaultValues: {
       clientId: "",
-      status: "paid",
-      paidAmount: 0,
       notes: "",
       items: [EMPTY_ITEM],
     },
   });
 
-  // useFieldArray — управляет динамическим массивом items
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
-
-  // useWatch — реактивно читаем items без ре-рендера всей формы
   const watchedItems = useWatch({ control, name: "items" });
-  const status = watch("status");
 
-  // Считаем итог прямо в рендере — источник правды это items
   const total = (watchedItems ?? []).reduce(
     (sum, item) => sum + (item.quantity || 0) * (item.priceAtSale || 0),
     0
   );
 
-  // При выборе товара автоматически подставляем его цену продажи
   const handleProductSelect = (index: number, productId: string) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
@@ -66,11 +58,9 @@ export function SaleForm({ clients, products }: SaleFormProps) {
   };
 
   const onSubmit = async (data: SaleFormValues) => {
-    // Если статус "paid" — paidAmount = total (всё оплачено)
     const payload = {
       ...data,
       clientId: data.clientId || undefined,
-      paidAmount: data.status === "paid" ? total : data.paidAmount,
     };
 
     const res = await fetch("/api/sales", {
@@ -121,7 +111,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           </h2>
         </div>
 
-        {/* Шапка таблицы */}
         <div className="hidden sm:grid grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <span>Товар</span>
           <span>Кол-во</span>
@@ -130,7 +119,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           <span />
         </div>
 
-        {/* Строки товаров */}
         <div className="divide-y divide-border">
           {fields.map((field, index) => {
             const qty = watchedItems?.[index]?.quantity || 0;
@@ -142,7 +130,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
 
             return (
               <div key={field.id} className="grid grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-3 items-center">
-                {/* Выбор товара */}
                 <div>
                   <Select
                     value={watchedItems?.[index]?.productId ?? ""}
@@ -174,7 +161,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
                   )}
                 </div>
 
-                {/* Количество */}
                 <Input
                   type="number"
                   step="0.1"
@@ -183,7 +169,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
                   {...register(`items.${index}.quantity`, { valueAsNumber: true })}
                 />
 
-                {/* Цена */}
                 <Input
                   type="number"
                   step="0.01"
@@ -192,12 +177,10 @@ export function SaleForm({ clients, products }: SaleFormProps) {
                   {...register(`items.${index}.priceAtSale`, { valueAsNumber: true })}
                 />
 
-                {/* Строчный итог */}
                 <span className="text-sm font-medium text-foreground text-right">
                   {rowTotal.toLocaleString("ru-KZ")} ₸
                 </span>
 
-                {/* Удалить строку */}
                 <button
                   type="button"
                   onClick={() => remove(index)}
@@ -211,7 +194,6 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           })}
         </div>
 
-        {/* Добавить строку */}
         <div className="px-5 py-3 border-t border-border">
           <button
             type="button"
@@ -223,68 +205,12 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           </button>
         </div>
 
-        {/* Итог */}
         <div className="px-5 py-4 border-t border-border bg-muted/20 flex justify-end items-center gap-3">
           <span className="text-sm text-muted-foreground">Итого:</span>
           <span className="text-xl font-semibold text-foreground">
             {total.toLocaleString("ru-KZ")} ₸
           </span>
         </div>
-      </div>
-
-      {/* ── Оплата ────────────────────────────────── */}
-      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
-          Оплата
-        </h2>
-
-        <div className="space-y-1.5">
-          <Label className="text-sm text-foreground">Статус</Label>
-          <Select
-            value={status}
-            onValueChange={(v) => setValue("status", v as SaleFormValues["status"])}
-          >
-            <SelectTrigger className="bg-input border-border text-foreground h-10">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-border">
-              <SelectItem value="paid">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-400" /> Оплачено полностью
-                </span>
-              </SelectItem>
-              <SelectItem value="partial">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-yellow-400" /> Оплачено частично
-                </span>
-              </SelectItem>
-              <SelectItem value="debt">
-                <span className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-red-400" /> Долг (не оплачено)
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Поле суммы оплаты — только для partial */}
-        {status === "partial" && (
-          <div className="space-y-1.5">
-            <Label className="text-sm text-foreground">
-              Оплачено сейчас, ₸
-              <span className="ml-2 text-xs text-muted-foreground">
-                (осталось: {(total - (watch("paidAmount") || 0)).toLocaleString("ru-KZ")} ₸)
-              </span>
-            </Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              className="bg-input border-border text-foreground h-10"
-              {...register("paidAmount", { valueAsNumber: true })}
-            />
-          </div>
-        )}
       </div>
 
       {/* ── Заметки ───────────────────────────────── */}

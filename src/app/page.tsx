@@ -1,21 +1,18 @@
 import Link from "next/link";
 import {
-  TrendingUp, Users, Package, AlertTriangle,
-  ShoppingCart, Banknote, ChevronRight, Clock,
+  TrendingUp, Users, Package, ShoppingCart, ChevronRight, Clock,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { TopProductsChart } from "@/components/dashboard/top-products-chart";
-import { SaleStatusBadge } from "@/components/sales/sale-status-badge";
 import { format, subDays, startOfDay, startOfMonth, endOfDay } from "date-fns";
 import { ru } from "date-fns/locale";
 
-// Строим данные для графика выручки за последние N дней
 async function getRevenueChartData(days: number) {
   const sales = await prisma.sale.findMany({
     where: { createdAt: { gte: subDays(new Date(), days) } },
-    select: { createdAt: true, paidAmount: true, totalAmount: true, status: true },
+    select: { createdAt: true, totalAmount: true },
   });
 
   return Array.from({ length: days }, (_, i) => {
@@ -27,8 +24,7 @@ async function getRevenueChartData(days: number) {
     );
     return {
       date: format(date, "d MMM", { locale: ru }),
-      revenue: daySales.reduce((sum, s) => sum + s.paidAmount, 0),
-      debt: daySales.reduce((sum, s) => sum + Math.max(0, s.totalAmount - s.paidAmount), 0),
+      revenue: daySales.reduce((sum, s) => sum + s.totalAmount, 0),
     };
   });
 }
@@ -36,7 +32,6 @@ async function getRevenueChartData(days: number) {
 export default async function DashboardPage() {
   const now = new Date();
   const monthStart = startOfMonth(now);
-  const weekStart = subDays(now, 7);
 
   const [
     allSales,
@@ -47,10 +42,10 @@ export default async function DashboardPage() {
     revenueChart,
     recentSales,
   ] = await Promise.all([
-    prisma.sale.findMany({ select: { paidAmount: true, totalAmount: true, status: true } }),
+    prisma.sale.findMany({ select: { totalAmount: true } }),
     prisma.sale.findMany({
       where: { createdAt: { gte: monthStart } },
-      select: { paidAmount: true, totalAmount: true },
+      select: { totalAmount: true },
     }),
     prisma.client.count(),
     prisma.product.count(),
@@ -61,11 +56,13 @@ export default async function DashboardPage() {
     prisma.sale.findMany({
       orderBy: { createdAt: "desc" },
       take: 6,
-      include: { client: { select: { name: true } }, saleItems: { include: { product: { select: { name: true } } } } },
+      include: {
+        client: { select: { name: true } },
+        saleItems: { include: { product: { select: { name: true } } } },
+      },
     }),
   ]);
 
-  // Считаем топ-товары за последние 30 дней
   const topItemsRaw = await prisma.saleItem.groupBy({
     by: ["productId"],
     where: { sale: { createdAt: { gte: subDays(now, 30) } } },
@@ -84,24 +81,20 @@ export default async function DashboardPage() {
     const product = topProductNames.find((p) => p.id === r.productId);
     return {
       name: product?.name ?? "Неизвестно",
-      revenue: (r._sum.priceAtSale ?? 0),
+      revenue: r._sum.priceAtSale ?? 0,
       qty: r._sum.quantity ?? 0,
     };
   });
 
-  // Агрегаты
-  const totalRevenue = allSales.reduce((s, x) => s + x.paidAmount, 0);
-  const monthRevenue = monthSales.reduce((s, x) => s + x.paidAmount, 0);
-  const totalDebt = allSales.reduce((s, x) => s + Math.max(0, x.totalAmount - x.paidAmount), 0);
-  const debtSales = allSales.filter((s) => s.status !== "paid").length;
+  const totalRevenue = allSales.reduce((s, x) => s + x.totalAmount, 0);
+  const monthRevenue = monthSales.reduce((s, x) => s + x.totalAmount, 0);
 
-  // Прирост: текущий месяц vs предыдущий (упрощённо — берём всё до monthStart)
   const prevMonthSales = await prisma.sale.findMany({
     where: { createdAt: { lt: monthStart } },
-    select: { paidAmount: true },
+    select: { totalAmount: true },
     take: 1000,
   });
-  const prevRevenue = prevMonthSales.reduce((s, x) => s + x.paidAmount, 0);
+  const prevRevenue = prevMonthSales.reduce((s, x) => s + x.totalAmount, 0);
   const revenueTrend =
     prevRevenue > 0 ? Math.round(((monthRevenue - prevRevenue) / prevRevenue) * 100) : 0;
 
@@ -135,11 +128,11 @@ export default async function DashboardPage() {
           variant="default"
         />
         <StatCard
-          label="Долг покупателей"
-          value={`${totalDebt.toLocaleString("ru-KZ")} ₸`}
-          sub={`${debtSales} продаж с долгом`}
-          icon={Banknote}
-          variant={totalDebt > 0 ? "danger" : "success"}
+          label="Продаж за месяц"
+          value={String(monthSales.length)}
+          sub={`всего ${allSales.length} продаж`}
+          icon={ShoppingCart}
+          variant="default"
         />
         <StatCard
           label="Клиентов"
@@ -157,20 +150,16 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ── Графики (2 колонки) ────────────── */}
+      {/* ── Графики ────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Выручка — шире */}
         <div className="lg:col-span-3 rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">Выручка за 14 дней</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Оплачено · Долг (пунктир)</p>
-            </div>
+          <div className="mb-5">
+            <h2 className="text-sm font-semibold text-foreground">Выручка за 14 дней</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">по дням</p>
           </div>
           <RevenueChart data={revenueChart} />
         </div>
 
-        {/* Топ-товары */}
         <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
           <div className="mb-5">
             <h2 className="text-sm font-semibold text-foreground">Топ товаров</h2>
@@ -217,14 +206,9 @@ export default async function DashboardPage() {
                       {sale.client?.name ?? "Без клиента"} · {format(sale.createdAt, "d MMM, HH:mm", { locale: ru })}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-foreground">
-                      {sale.totalAmount.toLocaleString("ru-KZ")} ₸
-                    </p>
-                    <div className="mt-0.5 flex justify-end">
-                      <SaleStatusBadge status={sale.status} />
-                    </div>
-                  </div>
+                  <p className="text-sm font-semibold text-foreground shrink-0">
+                    {sale.totalAmount.toLocaleString("ru-KZ")} ₸
+                  </p>
                 </Link>
               ))}
             </div>
@@ -236,7 +220,7 @@ export default async function DashboardPage() {
           {/* Мало на складе */}
           <div className="rounded-xl border border-border bg-card overflow-hidden flex-1">
             <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-              <AlertTriangle className="h-4 w-4 text-yellow-400" />
+              <Package className="h-4 w-4 text-yellow-400" />
               <h2 className="text-sm font-semibold text-foreground">Заканчивается</h2>
               <Link href="/products" className="ml-auto text-xs text-primary hover:text-primary/80 flex items-center gap-1">
                 Склад <ChevronRight className="h-3 w-3" />
@@ -260,9 +244,7 @@ export default async function DashboardPage() {
                         <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
                           {p.name}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          мин. {p.minStock} ед.
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">мин. {p.minStock} ед.</p>
                       </div>
                       <span className={`ml-3 shrink-0 text-sm font-bold ${isOut ? "text-red-400" : "text-yellow-400"}`}>
                         {p.stock} ед.

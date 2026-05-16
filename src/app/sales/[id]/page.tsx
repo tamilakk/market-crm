@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, User, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { SaleStatusBadge } from "@/components/sales/sale-status-badge";
 import { SaleActions } from "@/components/sales/sale-actions";
 import { unitLabel } from "@/components/products/stock-status";
 import { format } from "date-fns";
@@ -17,52 +16,29 @@ export default async function SaleDetailPage({ params }: Props) {
     where: { id },
     include: {
       client: true,
-      saleItems: {
-        include: { product: true },
-      },
+      saleItems: { include: { product: true } },
     },
   });
 
   if (!sale) notFound();
 
-  const debt = sale.totalAmount - sale.paidAmount;
-
   return (
     <div className="max-w-2xl">
-      {/* Breadcrumb */}
       <Link href="/sales"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
         <ChevronLeft className="h-4 w-4" /> Продажи
       </Link>
 
-      {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
-            <h1 className="text-2xl font-semibold text-foreground">
-              {sale.totalAmount.toLocaleString("ru-KZ")} ₸
-            </h1>
-            <SaleStatusBadge status={sale.status} />
-          </div>
+          <h1 className="text-2xl font-semibold text-foreground mb-1">
+            {sale.totalAmount.toLocaleString("ru-KZ")} ₸
+          </h1>
           <p className="text-sm text-muted-foreground">
             {format(sale.createdAt, "d MMMM yyyy, HH:mm", { locale: ru })}
           </p>
         </div>
         <SaleActions sale={sale} />
-      </div>
-
-      {/* Payment info */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { label: "Сумма продажи", value: `${sale.totalAmount.toLocaleString("ru-KZ")} ₸`, color: "text-foreground" },
-          { label: "Оплачено",      value: `${sale.paidAmount.toLocaleString("ru-KZ")} ₸`,  color: "text-green-400" },
-          { label: "Долг",          value: `${debt.toLocaleString("ru-KZ")} ₸`,              color: debt > 0 ? "text-red-400" : "text-muted-foreground" },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl border border-border bg-card p-4">
-            <p className="text-xs text-muted-foreground mb-1">{label}</p>
-            <p className={`text-lg font-semibold ${color}`}>{value}</p>
-          </div>
-        ))}
       </div>
 
       {/* Клиент */}
@@ -77,7 +53,7 @@ export default async function SaleDetailPage({ params }: Props) {
             {sale.client.name}
           </Link>
         ) : (
-          <p className="text-sm text-muted-foreground">Без клиента (розничная продажа)</p>
+          <p className="text-sm text-muted-foreground">Розничная продажа (без клиента)</p>
         )}
       </div>
 
@@ -110,7 +86,6 @@ export default async function SaleDetailPage({ params }: Props) {
           ))}
         </div>
 
-        {/* Итого */}
         <div className="flex justify-between px-5 py-4 border-t border-border bg-muted/20">
           <span className="text-sm text-muted-foreground">Итого</span>
           <span className="text-base font-semibold text-foreground">
@@ -119,7 +94,6 @@ export default async function SaleDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Заметки */}
       {sale.notes && (
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-sm font-medium text-foreground mb-2">Заметки</h2>
