@@ -5,10 +5,11 @@ export const productSchema = z.object({
   sku: z.string().optional(),
   category: z.enum(["wallpaper", "laminate", "other"]),
   unit: z.enum(["piece", "roll", "box", "m2"]),
-  purchasePrice: z.coerce.number().min(0, "Цена не может быть отрицательной"),
-  sellPrice: z.coerce.number().min(0, "Цена не может быть отрицательной"),
-  stock: z.coerce.number().min(0),
-  minStock: z.coerce.number().min(0),
+  // z.number() вместо z.coerce — тип числа в форме задаём через valueAsNumber
+  purchasePrice: z.number().min(0, "Цена не может быть отрицательной"),
+  sellPrice: z.number().min(0, "Цена не может быть отрицательной"),
+  stock: z.number().min(0),
+  minStock: z.number().min(0),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;
