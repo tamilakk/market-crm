@@ -1,6 +1,8 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
+  // Prisma 7 использует WASM engine — требует Driver Adapter
+  // Для SQLite используем @libsql/client через @prisma/adapter-libsql
 }
 
 datasource db {
