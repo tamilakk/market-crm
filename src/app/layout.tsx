@@ -17,15 +17,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru">
-      <body className={`${geist.className} bg-gray-50`}>
-        <div className="flex h-screen overflow-hidden">
+    <html lang="ru" className="h-full">
+      <body className={`${geist.className} h-full bg-background text-foreground antialiased`}>
+        <div className="flex h-full overflow-hidden">
           <div className="hidden md:flex md:flex-shrink-0">
             <Sidebar />
           </div>
           <div className="flex flex-1 flex-col overflow-hidden">
             <MobileHeader />
-            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+            <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+              {children}
+            </main>
           </div>
         </div>
       </body>
