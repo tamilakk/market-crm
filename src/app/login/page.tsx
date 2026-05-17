@@ -39,7 +39,7 @@ export default function LoginPage() {
           <div className="h-14 w-14 rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
             <ShoppingBag className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">Базар CRM</h1>
+          <h1 className="text-xl font-bold text-foreground">WallDecor</h1>
           <p className="text-sm text-muted-foreground mt-1">Қарағанды · стройматериалы</p>
         </div>
 

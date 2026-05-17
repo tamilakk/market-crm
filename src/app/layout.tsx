@@ -7,7 +7,7 @@ import { MobileHeader } from "@/components/layout/mobile-header";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Рынок CRM",
+  title: "WallDecor",
   description: "CRM для торговли стройматериалами — Қарағанды",
 };
 

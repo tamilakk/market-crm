@@ -36,7 +36,7 @@ export function MobileHeader() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <Store className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold text-foreground">Рынок CRM</span>
+            <span className="text-sm font-semibold text-foreground">WallDecor</span>
           </div>
           <nav className="space-y-0.5 p-3">
             {navItems.map(({ href, label, icon: Icon }) => {
@@ -67,7 +67,7 @@ export function MobileHeader() {
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
           <Store className="h-4 w-4 text-primary-foreground" />
         </div>
-        <span className="text-sm font-semibold text-foreground">Рынок CRM</span>
+        <span className="text-sm font-semibold text-foreground">WallDecor</span>
       </div>
     </header>
   );

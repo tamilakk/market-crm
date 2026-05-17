@@ -31,7 +31,7 @@ export function Sidebar() {
           <Store className="h-4 w-4 text-primary-foreground" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-foreground leading-none">Рынок CRM</p>
+          <p className="text-sm font-semibold text-foreground leading-none">WallDecor</p>
           <p className="text-xs text-muted-foreground mt-0.5">Қарағанды</p>
         </div>
       </div>
