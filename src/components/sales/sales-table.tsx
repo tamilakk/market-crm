@@ -49,18 +49,26 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
   return (
     <>
       {/* Toolbar */}
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по клиенту или товару..."
-            className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground h-10"
-          />
+      <div className="mb-5 space-y-3">
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Поиск..."
+              className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground h-10"
+            />
+          </div>
+          <Button
+            onClick={() => router.push("/sales/new")}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-10 shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Новая продажа</span>
+          </Button>
         </div>
-
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {DATE_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -75,17 +83,9 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
             </button>
           ))}
         </div>
-
-        <Button
-          onClick={() => router.push("/sales/new")}
-          className="ml-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-10"
-        >
-          <Plus className="h-4 w-4" />
-          Новая продажа
-        </Button>
       </div>
 
-      {/* Table */}
+      {/* List */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-20 text-center">
           <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -98,7 +98,8 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
         </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          <div className="grid grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
+          {/* Desktop header */}
+          <div className="hidden md:grid md:grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
             {["Дата", "Позиции", "Клиент", "Сумма", ""].map((h) => (
               <span key={h} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {h}
@@ -111,35 +112,54 @@ export function SalesTable({ sales }: { sales: SaleWithRelations[] }) {
               <Link
                 key={sale.id}
                 href={`/sales/${sale.id}`}
-                className="grid grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+                className="group block hover:bg-muted/30 transition-colors"
               >
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {format(new Date(sale.createdAt), "d MMM yyyy", { locale: ru })}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {format(new Date(sale.createdAt), "HH:mm")}
-                  </p>
+                {/* Mobile layout */}
+                <div className="md:hidden px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                        {sale.saleItems.map((i) => i.product.name).join(", ")}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {sale.client?.name ?? "Без клиента"} · {format(new Date(sale.createdAt), "d MMM, HH:mm", { locale: ru })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {sale.totalAmount.toLocaleString("ru-KZ")} ₸
+                      </p>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="text-sm text-foreground leading-snug line-clamp-1">
-                    {sale.saleItems.map((i) => i.product.name).join(", ")}
+                {/* Desktop layout */}
+                <div className="hidden md:grid md:grid-cols-[140px_1fr_160px_140px_36px] gap-4 px-5 py-4 items-center">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {format(new Date(sale.createdAt), "d MMM yyyy", { locale: ru })}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {format(new Date(sale.createdAt), "HH:mm")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-foreground leading-snug line-clamp-1">
+                      {sale.saleItems.map((i) => i.product.name).join(", ")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {sale.saleItems.length} поз.
+                    </p>
+                  </div>
+                  <p className="text-sm text-foreground truncate">
+                    {sale.client?.name ?? <span className="text-muted-foreground">—</span>}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {sale.saleItems.length} поз.
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {sale.totalAmount.toLocaleString("ru-KZ")} ₸
                   </p>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors justify-self-end" />
                 </div>
-
-                <p className="text-sm text-foreground truncate">
-                  {sale.client?.name ?? <span className="text-muted-foreground">—</span>}
-                </p>
-
-                <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {sale.totalAmount.toLocaleString("ru-KZ")} ₸
-                </p>
-
-                <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors justify-self-end" />
               </Link>
             ))}
           </div>

@@ -111,7 +111,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           </h2>
         </div>
 
-        <div className="hidden sm:grid grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <div className="hidden sm:grid sm:grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <span>Товар</span>
           <span>Кол-во</span>
           <span>Цена, ₸</span>
@@ -129,7 +129,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
             );
 
             return (
-              <div key={field.id} className="grid grid-cols-[1fr_100px_130px_110px_40px] gap-3 px-5 py-3 items-center">
+              <div key={field.id} className="px-4 py-3 sm:px-5 grid grid-cols-1 sm:grid-cols-[1fr_100px_130px_110px_40px] gap-3 sm:items-center">
                 <div>
                   <Select
                     value={watchedItems?.[index]?.productId ?? ""}
@@ -161,34 +161,39 @@ export function SaleForm({ clients, products }: SaleFormProps) {
                   )}
                 </div>
 
-                <Input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  className="bg-input border-border text-foreground h-9 text-sm"
-                  {...register(`items.${index}.quantity`, { valueAsNumber: true })}
-                />
-
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="bg-input border-border text-foreground h-9 text-sm"
-                  {...register(`items.${index}.priceAtSale`, { valueAsNumber: true })}
-                />
-
-                <span className="text-sm font-medium text-foreground text-right">
-                  {rowTotal.toLocaleString("ru-KZ")} ₸
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => remove(index)}
-                  disabled={fields.length === 1}
-                  className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="grid grid-cols-[1fr_1fr_auto_auto] sm:contents gap-2 items-center">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1 sm:hidden">Кол-во</p>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0.1"
+                      className="bg-input border-border text-foreground h-9 text-sm"
+                      {...register(`items.${index}.quantity`, { valueAsNumber: true })}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1 sm:hidden">Цена, ₸</p>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="bg-input border-border text-foreground h-9 text-sm"
+                      {...register(`items.${index}.priceAtSale`, { valueAsNumber: true })}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-foreground text-right whitespace-nowrap">
+                    {rowTotal.toLocaleString("ru-KZ")} ₸
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    disabled={fields.length === 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             );
           })}

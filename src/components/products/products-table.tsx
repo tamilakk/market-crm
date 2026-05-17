@@ -49,9 +49,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
 
   return (
     <>
-      {/* Stats row */}
+      {/* Stock alerts */}
       {(lowStock > 0 || outStock > 0) && (
-        <div className="mb-5 flex gap-3">
+        <div className="mb-5 flex flex-wrap gap-3">
           {outStock > 0 && (
             <div className="flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-2.5">
               <span className="h-2 w-2 rounded-full bg-red-400" />
@@ -72,19 +72,26 @@ export function ProductsTable({ products }: ProductsTableProps) {
       )}
 
       {/* Toolbar */}
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск по названию или артикулу..."
-            className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground h-10"
-          />
+      <div className="mb-5 space-y-3">
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Поиск..."
+              className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground h-10"
+            />
+          </div>
+          <Button
+            onClick={() => setFormOpen(true)}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-10 shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Добавить товар</span>
+          </Button>
         </div>
-
-        {/* Category filter */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
@@ -99,17 +106,9 @@ export function ProductsTable({ products }: ProductsTableProps) {
             </button>
           ))}
         </div>
-
-        <Button
-          onClick={() => setFormOpen(true)}
-          className="ml-auto bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-10"
-        >
-          <Plus className="h-4 w-4" />
-          Добавить товар
-        </Button>
       </div>
 
-      {/* Table */}
+      {/* List */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-20 text-center">
           <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -122,8 +121,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
         </div>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-[1fr_110px_100px_120px_120px_100px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
+          {/* Desktop header */}
+          <div className="hidden md:grid md:grid-cols-[1fr_110px_100px_120px_120px_100px_36px] gap-4 px-5 py-3 bg-muted/40 border-b border-border">
             {["Товар", "Категория", "Артикул", "Закуп.", "Продажа", "Склад", ""].map((h) => (
               <span key={h} className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {h}
@@ -131,7 +130,6 @@ export function ProductsTable({ products }: ProductsTableProps) {
             ))}
           </div>
 
-          {/* Rows */}
           <div className="divide-y divide-border">
             {filtered.map((product) => {
               const margin = product.purchasePrice > 0
@@ -142,37 +140,55 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <Link
                   key={product.id}
                   href={`/products/${product.id}`}
-                  className="grid grid-cols-[1fr_110px_100px_120px_120px_100px_36px] gap-4 px-5 py-4 items-center hover:bg-muted/30 transition-colors group"
+                  className="group block hover:bg-muted/30 transition-colors"
                 >
-                  {/* Name */}
-                  <div>
-                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
-                      {product.name}
-                    </p>
+                  {/* Mobile layout */}
+                  <div className="md:hidden px-4 py-3.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
+                          {product.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <ProductCategoryBadge category={product.category} />
+                          <span className="text-xs text-foreground font-medium">
+                            {product.sellPrice.toLocaleString("ru-KZ")} ₸
+                            {margin > 0 && (
+                              <span className="ml-1 text-green-400">+{margin}%</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StockStatus product={product} />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                    </div>
                   </div>
 
-                  <ProductCategoryBadge category={product.category} />
-
-                  <span className="text-sm text-muted-foreground font-mono">
-                    {product.sku ?? "—"}
-                  </span>
-
-                  <span className="text-sm text-muted-foreground">
-                    {product.purchasePrice.toLocaleString("ru-KZ")} ₸
-                  </span>
-
-                  <div>
-                    <span className="text-sm font-medium text-foreground">
-                      {product.sellPrice.toLocaleString("ru-KZ")} ₸
+                  {/* Desktop layout */}
+                  <div className="hidden md:grid md:grid-cols-[1fr_110px_100px_120px_120px_100px_36px] gap-4 px-5 py-4 items-center">
+                    <div>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-tight">
+                        {product.name}
+                      </p>
+                    </div>
+                    <ProductCategoryBadge category={product.category} />
+                    <span className="text-sm text-muted-foreground font-mono">{product.sku ?? "—"}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {product.purchasePrice.toLocaleString("ru-KZ")} ₸
                     </span>
-                    {margin > 0 && (
-                      <span className="ml-1.5 text-xs text-green-400">+{margin}%</span>
-                    )}
+                    <div>
+                      <span className="text-sm font-medium text-foreground">
+                        {product.sellPrice.toLocaleString("ru-KZ")} ₸
+                      </span>
+                      {margin > 0 && (
+                        <span className="ml-1.5 text-xs text-green-400">+{margin}%</span>
+                      )}
+                    </div>
+                    <StockStatus product={product} />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors justify-self-end" />
                   </div>
-
-                  <StockStatus product={product} />
-
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors justify-self-end" />
                 </Link>
               );
             })}

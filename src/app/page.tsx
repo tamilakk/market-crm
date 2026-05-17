@@ -110,10 +110,10 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/sales/new"
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shrink-0"
         >
           <ShoppingCart className="h-4 w-4" />
-          Новая продажа
+          <span className="hidden sm:inline">Новая продажа</span>
         </Link>
       </div>
 
