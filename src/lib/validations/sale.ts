@@ -3,7 +3,7 @@ import { z } from "zod";
 const saleItemSchema = z.object({
   productId: z.string().min(1, "Выберите товар"),
   quantity: z.number().min(0.1, "Количество должно быть больше 0"),
-  priceAtSale: z.number().min(0),
+  priceAtSale: z.number().min(0.01, "Цена должна быть больше 0"),
 });
 
 export const saleSchema = z.object({

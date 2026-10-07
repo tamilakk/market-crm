@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -29,6 +30,7 @@ const EMPTY: ProductFormValues = {
 export function ProductForm({ open, onOpenChange, defaultValues }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!defaultValues;
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register, handleSubmit, setValue, watch, reset,
@@ -50,13 +52,22 @@ export function ProductForm({ open, onOpenChange, defaultValues }: ProductFormPr
   });
 
   const onSubmit = async (data: ProductFormValues) => {
+    setSubmitError(null);
     const url = isEdit ? `/api/products/${defaultValues.id}` : "/api/products";
     const res = await fetch(url, {
       method: isEdit ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (res.ok) { reset(); onOpenChange(false); router.refresh(); }
+    if (res.ok) {
+      reset();
+      onOpenChange(false);
+      router.refresh();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      const skuError = body.error?.sku?.[0];
+      setSubmitError(skuError ?? (typeof body.error === "string" ? body.error : "Не удалось сохранить товар"));
+    }
   };
 
   const cls = "bg-input border-border text-foreground placeholder:text-muted-foreground h-10";
@@ -145,6 +156,9 @@ export function ProductForm({ open, onOpenChange, defaultValues }: ProductFormPr
             </div>
           </div>
 
+          {submitError && (
+            <p className="text-sm text-destructive">{submitError}</p>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => onOpenChange(false)}>
               Отмена

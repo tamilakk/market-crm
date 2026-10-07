@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,7 @@ interface ClientFormProps {
 export function ClientForm({ open, onOpenChange, defaultValues }: ClientFormProps) {
   const router = useRouter();
   const isEdit = !!defaultValues;
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -54,9 +56,8 @@ export function ClientForm({ open, onOpenChange, defaultValues }: ClientFormProp
   });
 
   const onSubmit = async (data: ClientFormValues) => {
-    const url = isEdit
-      ? `/api/clients/${defaultValues.id}`
-      : "/api/clients";
+    setSubmitError(null);
+    const url = isEdit ? `/api/clients/${defaultValues.id}` : "/api/clients";
     const method = isEdit ? "PUT" : "POST";
 
     const res = await fetch(url, {
@@ -69,6 +70,12 @@ export function ClientForm({ open, onOpenChange, defaultValues }: ClientFormProp
       reset();
       onOpenChange(false);
       router.refresh();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      const msg = typeof body.error === "string"
+        ? body.error
+        : "Не удалось сохранить клиента";
+      setSubmitError(msg);
     }
   };
 
@@ -148,6 +155,9 @@ export function ClientForm({ open, onOpenChange, defaultValues }: ClientFormProp
             />
           </div>
 
+          {submitError && (
+            <p className="text-sm text-destructive">{submitError}</p>
+          )}
           <div className="flex gap-2 justify-end pt-2">
             <Button
               type="button"

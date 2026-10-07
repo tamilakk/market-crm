@@ -79,7 +79,10 @@ export function SaleForm({ clients, products }: SaleFormProps) {
       router.refresh();
     } else {
       const body = await res.json().catch(() => ({}));
-      setSubmitError(body.error ?? "Не удалось создать продажу");
+      const msg = typeof body.error === "string"
+        ? body.error
+        : "Не удалось создать продажу";
+      setSubmitError(msg);
     }
   };
 

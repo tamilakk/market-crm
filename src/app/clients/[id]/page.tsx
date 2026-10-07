@@ -12,23 +12,28 @@ type Props = { params: Promise<{ id: string }> };
 export default async function ClientDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const client = await prisma.client.findUnique({
-    where: { id },
-    include: {
-      sales: {
-        orderBy: { createdAt: "desc" },
-        take: 10,
+  const [client, salesStats] = await Promise.all([
+    prisma.client.findUnique({
+      where: { id },
+      include: {
+        sales: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        },
       },
-    },
-  });
+    }),
+    prisma.sale.aggregate({
+      where: { clientId: id },
+      _sum: { paidAmount: true, totalAmount: true },
+      _count: true,
+    }),
+  ]);
 
   if (!client) notFound();
 
-  const totalRevenue = client.sales.reduce((sum, s) => sum + s.paidAmount, 0);
-  const debtAmount = client.sales.reduce(
-    (sum, s) => sum + (s.totalAmount - s.paidAmount),
-    0
-  );
+  const totalRevenue = salesStats._sum.paidAmount ?? 0;
+  const debtAmount =
+    (salesStats._sum.totalAmount ?? 0) - (salesStats._sum.paidAmount ?? 0);
 
   return (
     <div className="max-w-3xl">
@@ -58,7 +63,7 @@ export default async function ClientDetailPage({ params }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Покупок", value: client.sales.length },
+          { label: "Покупок", value: salesStats._count },
           {
             label: "Оплачено",
             value: `${totalRevenue.toLocaleString("ru-KZ")} ₸`,
