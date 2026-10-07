@@ -43,36 +43,65 @@ export async function PUT(request: Request, { params }: Params) {
     );
   }
 
-  const sale = await prisma.sale.update({
-    where: { id },
-    data: parsed.data,
-  });
-
-  return NextResponse.json(sale);
+  try {
+    const sale = await prisma.sale.update({
+      where: { id },
+      data: parsed.data,
+    });
+    return NextResponse.json(sale);
+  } catch (e: unknown) {
+    if (isPrismaCode(e, "P2025")) {
+      return NextResponse.json({ error: "Продажа не найдена" }, { status: 404 });
+    }
+    throw e;
+  }
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
   const { id } = await params;
 
-  // Транзакция: восстанавливаем остатки и удаляем продажу
-  await prisma.$transaction(async (tx) => {
-    const sale = await tx.sale.findUnique({
-      where: { id },
-      include: { saleItems: true },
+  try {
+    await prisma.$transaction(async (tx) => {
+      const sale = await tx.sale.findUnique({
+        where: { id },
+        include: { saleItems: true },
+      });
+
+      if (!sale) {
+        const err = new Error("Продажа не найдена");
+        (err as unknown as { code: string }).code = "NOT_FOUND";
+        throw err;
+      }
+
+      for (const item of sale.saleItems) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+
+      await tx.sale.delete({ where: { id } });
     });
 
-    if (!sale) return;
-
-    // Возвращаем товар на склад
-    for (const item of sale.saleItems) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { increment: item.quantity } },
-      });
+    return new NextResponse(null, { status: 204 });
+  } catch (e: unknown) {
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "code" in e &&
+      (e as { code: string }).code === "NOT_FOUND"
+    ) {
+      return NextResponse.json({ error: "Продажа не найдена" }, { status: 404 });
     }
+    throw e;
+  }
+}
 
-    await tx.sale.delete({ where: { id } });
-  });
-
-  return new NextResponse(null, { status: 204 });
+function isPrismaCode(e: unknown, code: string): boolean {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "code" in e &&
+    (e as { code: string }).code === code
+  );
 }
