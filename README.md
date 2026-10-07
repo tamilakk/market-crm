@@ -41,12 +41,6 @@
 - [Vercel](https://vercel.com) — хостинг
 - [Turso](https://turso.tech) — serverless SQLite в облаке
 
-## Скриншоты
-
-> Тёмная тема с оранжевыми акцентами, адаптирована под планшет и десктоп
-
-![Dashboard](https://github.com/user-attachments/assets/placeholder-dashboard)
-
 ## Архитектурные решения
 
 **Server Components по умолчанию** — все страницы-списки и дашборд рендерятся на сервере, данные приходят уже готовые. `"use client"` только там, где нужна интерактивность (таблицы с фильтрами, формы).
