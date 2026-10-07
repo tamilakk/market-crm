@@ -32,32 +32,27 @@ export async function POST(request: Request) {
     0
   );
 
-  // Проверяем остатки до создания продажи
-  const productIds = items.map((i) => i.productId);
-  const dbProducts = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: { id: true, name: true, stock: true },
-  });
-
-  for (const item of items) {
-    const product = dbProducts.find((p) => p.id === item.productId);
-    if (!product) {
-      return NextResponse.json(
-        { error: `Товар не найден: ${item.productId}` },
-        { status: 422 }
-      );
-    }
-    if (product.stock < item.quantity) {
-      return NextResponse.json(
-        {
-          error: `Недостаточно товара "${product.name}": на складе ${product.stock}, запрошено ${item.quantity}`,
-        },
-        { status: 422 }
-      );
-    }
-  }
-
   const sale = await prisma.$transaction(async (tx) => {
+    // Проверяем остатки внутри транзакции — защита от гонки запросов
+    const productIds = items.map((i) => i.productId);
+    const dbProducts = await tx.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, name: true, stock: true },
+    });
+
+    for (const item of items) {
+      const product = dbProducts.find((p) => p.id === item.productId);
+      if (!product) {
+        throw Object.assign(new Error(`Товар не найден: ${item.productId}`), { code: "STOCK_ERROR" });
+      }
+      if (product.stock < item.quantity) {
+        throw Object.assign(
+          new Error(`Недостаточно товара "${product.name}": на складе ${product.stock}, запрошено ${item.quantity}`),
+          { code: "STOCK_ERROR" }
+        );
+      }
+    }
+
     const created = await tx.sale.create({
       data: {
         ...rest,
@@ -82,7 +77,16 @@ export async function POST(request: Request) {
     }
 
     return created;
+  }).catch((e: unknown) => {
+    if (typeof e === "object" && e !== null && (e as { code?: string }).code === "STOCK_ERROR") {
+      return { _stockError: (e as Error).message };
+    }
+    throw e;
   });
+
+  if ("_stockError" in sale) {
+    return NextResponse.json({ error: sale._stockError }, { status: 422 });
+  }
 
   return NextResponse.json(sale, { status: 201 });
 }

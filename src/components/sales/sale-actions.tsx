@@ -107,7 +107,10 @@ export function SaleActions({ sale }: { sale: Sale }) {
                   type="number"
                   step="0.01"
                   value={paidAmount}
-                  onChange={(e) => setPaidAmount(Number(e.target.value))}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    setPaidAmount(isNaN(v) ? sale.paidAmount : v);
+                  }}
                   className="bg-input border-border text-foreground h-10"
                 />
               </div>

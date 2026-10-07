@@ -74,8 +74,8 @@ export function SaleForm({ clients, products }: SaleFormProps) {
     });
 
     if (res.ok) {
-      const sale = await res.json();
-      router.push(`/sales/${sale.id}`);
+      const sale = await res.json().catch(() => null);
+      router.push(sale?.id ? `/sales/${sale.id}` : "/sales");
       router.refresh();
     } else {
       const body = await res.json().catch(() => ({}));
