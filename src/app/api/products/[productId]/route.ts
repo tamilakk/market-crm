@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validations/product";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ productId: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { productId: id } = await params;
 
   const product = await prisma.product.findUnique({
     where: { id },
@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
-  const { id } = await params;
+  const { productId: id } = await params;
   const body = await request.json();
   const parsed = productSchema.safeParse(body);
 
@@ -46,7 +46,7 @@ export async function PUT(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { productId: id } = await params;
 
   try {
     await prisma.product.delete({ where: { id } });

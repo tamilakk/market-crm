@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ saleId: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { saleId: id } = await params;
 
   const sale = await prisma.sale.findUnique({
     where: { id },
@@ -32,7 +32,7 @@ const updateSchema = z.object({
 });
 
 export async function PUT(request: Request, { params }: Params) {
-  const { id } = await params;
+  const { saleId: id } = await params;
   const body = await request.json();
   const parsed = updateSchema.safeParse(body);
 
@@ -74,7 +74,7 @@ export async function PUT(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { saleId: id } = await params;
 
   try {
     await prisma.$transaction(async (tx) => {

@@ -8,10 +8,10 @@ import { ProductActions } from "@/components/products/product-actions";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ productId: string }> };
 
 export default async function ProductDetailPage({ params }: Props) {
-  const { id } = await params;
+  const { productId: id } = await params;
 
   const product = await prisma.product.findUnique({
     where: { id },

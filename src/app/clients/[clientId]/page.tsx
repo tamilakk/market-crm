@@ -7,10 +7,10 @@ import { ClientActions } from "@/components/clients/client-actions";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ clientId: string }> };
 
 export default async function ClientDetailPage({ params }: Props) {
-  const { id } = await params;
+  const { clientId: id } = await params;
 
   const [client, salesStats] = await Promise.all([
     prisma.client.findUnique({

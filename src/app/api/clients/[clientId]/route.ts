@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { clientSchema } from "@/lib/validations/client";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: Promise<{ clientId: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { clientId: id } = await params;
 
   const client = await prisma.client.findUnique({
     where: { id },
@@ -25,7 +25,7 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
-  const { id } = await params;
+  const { clientId: id } = await params;
   const body = await request.json();
   const parsed = clientSchema.safeParse(body);
 
@@ -51,7 +51,7 @@ export async function PUT(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const { id } = await params;
+  const { clientId: id } = await params;
 
   try {
     await prisma.client.delete({ where: { id } });

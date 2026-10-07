@@ -7,10 +7,10 @@ import { unitLabel } from "@/components/products/stock-status";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ saleId: string }> };
 
 export default async function SaleDetailPage({ params }: Props) {
-  const { id } = await params;
+  const { saleId: id } = await params;
 
   const sale = await prisma.sale.findUnique({
     where: { id },
