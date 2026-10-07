@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Phone, MapPin, FileText, ShoppingCart } from "lucide-react";

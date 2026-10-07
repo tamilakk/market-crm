@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { SalesTable } from "@/components/sales/sales-table";
 import { startOfMonth } from "date-fns";
