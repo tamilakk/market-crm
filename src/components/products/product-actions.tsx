@@ -12,13 +12,21 @@ export function ProductActions({ product }: { product: Product }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleDelete = async () => {
     setDeleting(true);
-    await fetch(`/api/products/${product.id}`, { method: "DELETE" });
-    router.push("/products");
-    router.refresh();
+    setDeleteError(null);
+    const res = await fetch(`/api/products/${product.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/products");
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error ?? "Не удалось удалить товар");
+      setDeleting(false);
+    }
   };
 
   return (
@@ -44,6 +52,9 @@ export function ProductActions({ product }: { product: Product }) {
           <p className="text-sm text-muted-foreground">
             Товар <span className="font-medium text-foreground">{product.name}</span> будет удалён без возможности восстановления.
           </p>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
           <div className="flex gap-2 justify-end mt-4">
             <Button variant="ghost" className="text-muted-foreground" onClick={() => setDeleteOpen(false)}>
               Отмена
