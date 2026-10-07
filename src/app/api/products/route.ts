@@ -38,6 +38,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const product = await prisma.product.create({ data: parsed.data });
-  return NextResponse.json(product, { status: 201 });
+  try {
+    const product = await prisma.product.create({ data: parsed.data });
+    return NextResponse.json(product, { status: 201 });
+  } catch (e: unknown) {
+    if (
+      typeof e === "object" &&
+      e !== null &&
+      "code" in e &&
+      (e as { code: string }).code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: { sku: ["Товар с таким SKU уже существует"] } },
+        { status: 409 }
+      );
+    }
+    throw e;
+  }
 }

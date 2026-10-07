@@ -17,13 +17,21 @@ export function ClientActions({ client }: { client: Client }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleDelete = async () => {
     setDeleting(true);
-    await fetch(`/api/clients/${client.id}`, { method: "DELETE" });
-    router.push("/clients");
-    router.refresh();
+    setDeleteError(null);
+    const res = await fetch(`/api/clients/${client.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/clients");
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error ?? "Не удалось удалить клиента");
+      setDeleting(false);
+    }
   };
 
   return (
@@ -61,6 +69,9 @@ export function ClientActions({ client }: { client: Client }) {
             Клиент <span className="font-medium text-foreground">{client.name}</span> будет
             удалён. Это действие нельзя отменить.
           </p>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
           <div className="flex gap-2 justify-end mt-4">
             <Button
               variant="ghost"

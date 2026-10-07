@@ -19,13 +19,16 @@ export function SaleActions({ sale }: { sale: Sale }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [status, setStatus] = useState(sale.status);
   const [paidAmount, setPaidAmount] = useState(sale.paidAmount);
   const router = useRouter();
 
   const handleSave = async () => {
     setSaving(true);
-    await fetch(`/api/sales/${sale.id}`, {
+    setSaveError(null);
+    const res = await fetch(`/api/sales/${sale.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -35,15 +38,27 @@ export function SaleActions({ sale }: { sale: Sale }) {
       }),
     });
     setSaving(false);
-    setEditOpen(false);
-    router.refresh();
+    if (res.ok) {
+      setEditOpen(false);
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setSaveError(data.error ?? "Не удалось сохранить изменения");
+    }
   };
 
   const handleDelete = async () => {
     setDeleting(true);
-    await fetch(`/api/sales/${sale.id}`, { method: "DELETE" });
-    router.push("/sales");
-    router.refresh();
+    setDeleteError(null);
+    const res = await fetch(`/api/sales/${sale.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/sales");
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error ?? "Не удалось удалить продажу");
+      setDeleting(false);
+    }
   };
 
   return (
@@ -98,6 +113,9 @@ export function SaleActions({ sale }: { sale: Sale }) {
               </div>
             )}
 
+            {saveError && (
+              <p className="text-sm text-destructive">{saveError}</p>
+            )}
             <div className="flex gap-2 justify-end pt-1">
               <Button variant="ghost" className="text-muted-foreground" onClick={() => setEditOpen(false)}>
                 Отмена
@@ -124,6 +142,9 @@ export function SaleActions({ sale }: { sale: Sale }) {
             </span>{" "}
             будет удалена, а товары вернутся на склад.
           </p>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
           <div className="flex gap-2 justify-end mt-4">
             <Button variant="ghost" className="text-muted-foreground" onClick={() => setDeleteOpen(false)}>
               Отмена

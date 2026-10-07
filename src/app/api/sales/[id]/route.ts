@@ -43,6 +43,22 @@ export async function PUT(request: Request, { params }: Params) {
     );
   }
 
+  const existing = await prisma.sale.findUnique({
+    where: { id },
+    select: { totalAmount: true },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ error: "Продажа не найдена" }, { status: 404 });
+  }
+
+  if (parsed.data.paidAmount > existing.totalAmount) {
+    return NextResponse.json(
+      { error: `Оплата не может превышать сумму продажи (${existing.totalAmount} ₸)` },
+      { status: 422 }
+    );
+  }
+
   try {
     const sale = await prisma.sale.update({
       where: { id },

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -24,6 +25,8 @@ const EMPTY_ITEM = { productId: "", quantity: 1, priceAtSale: 0 };
 
 export function SaleForm({ clients, products }: SaleFormProps) {
   const router = useRouter();
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -58,6 +61,7 @@ export function SaleForm({ clients, products }: SaleFormProps) {
   };
 
   const onSubmit = async (data: SaleFormValues) => {
+    setSubmitError(null);
     const payload = {
       ...data,
       clientId: data.clientId || undefined,
@@ -73,6 +77,9 @@ export function SaleForm({ clients, products }: SaleFormProps) {
       const sale = await res.json();
       router.push(`/sales/${sale.id}`);
       router.refresh();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setSubmitError(body.error ?? "Не удалось создать продажу");
     }
   };
 
@@ -230,6 +237,10 @@ export function SaleForm({ clients, products }: SaleFormProps) {
           {...register("notes")}
         />
       </div>
+
+      {submitError && (
+        <p className="text-sm text-destructive">{submitError}</p>
+      )}
 
       {/* ── Действия ──────────────────────────────── */}
       <div className="flex items-center gap-3 pb-6">

@@ -32,6 +32,31 @@ export async function POST(request: Request) {
     0
   );
 
+  // Проверяем остатки до создания продажи
+  const productIds = items.map((i) => i.productId);
+  const dbProducts = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: { id: true, name: true, stock: true },
+  });
+
+  for (const item of items) {
+    const product = dbProducts.find((p) => p.id === item.productId);
+    if (!product) {
+      return NextResponse.json(
+        { error: `Товар не найден: ${item.productId}` },
+        { status: 422 }
+      );
+    }
+    if (product.stock < item.quantity) {
+      return NextResponse.json(
+        {
+          error: `Недостаточно товара "${product.name}": на складе ${product.stock}, запрошено ${item.quantity}`,
+        },
+        { status: 422 }
+      );
+    }
+  }
+
   const sale = await prisma.$transaction(async (tx) => {
     const created = await tx.sale.create({
       data: {
